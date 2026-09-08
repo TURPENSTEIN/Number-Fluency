@@ -417,12 +417,7 @@
     line-height: 1.5;
   }
 
-  /* Mental Model SVG Animations */
-  @keyframes laserSweep {
-    0% { transform: scaleX(0); }
-    100% { transform: scaleX(1); }
-  }
-
+  /* Mental Model Animations */
   @keyframes pulseGlow {
     0%, 100% { opacity: 0.6; }
     50% { opacity: 1; filter: drop-shadow(0 0 6px var(--accent)); }
@@ -507,7 +502,7 @@
     </div>
 
     <div class="helper-text" id="helper-text">
-      Submit with <span class="kbd">Space</span> or <span class="kbd">Enter</span>. Fractions (<span class="kbd">3/4</span>), decimals (<span class="kbd">0.75</span>), percentages (<span class="kbd">75%</span>), or signed integers (<span class="kbd">-8</span>).
+      Submit with <span class="kbd">Space</span> or <span class="kbd">Enter</span>. Accepts fractions (<span class="kbd">3/4</span>), decimals (<span class="kbd">0.75</span>), percentages (<span class="kbd">75%</span>), or signed integers (<span class="kbd">-8</span>).
     </div>
 
     <!-- 1. Start Landing Screen Overlay -->
@@ -567,7 +562,7 @@
   </div>
 
   <div class="info-panel">
-    <strong>Dimensional Mental Models:</strong> Errors reveal dynamic representations engineered to scale across multi-digit numbers: <em>Area Partition Decomposition</em> for multiplication, <em>Dual-Dimensional Gauges</em> for fraction-decimal equivalencies, and <em>Signed Neutralization Flux</em> for signed sums.
+    <strong>Key Controls:</strong> Both <span class="kbd">Space</span> and <span class="kbd">Enter</span> submit answers and dismiss mental model breakdowns. Pause anytime with <span class="kbd">P</span> or <span class="kbd">Esc</span>.
   </div>
 </div>
 
@@ -649,26 +644,18 @@
     { r: new Rational(2, 3), dec: 0.667, pct: "66.7%" }
   ];
 
-  // --- NEW DIMENSIONAL MENTAL MODELS ---
+  // --- Dimensional Mental Models (SVG) ---
   const Visualizers = {
-    /**
-     * Model 1: Proportional Area Decomposer (Box / Array Model)
-     * Replaces cramped models with place-value area chunking for multiplication/division.
-     * Scales cleanly for 1-digit and 2-digit numbers (e.g. 14 x 6 => [10 x 6 = 60] + [4 x 6 = 24]).
-     */
     renderAreaDecomposition(op1, op2, answer) {
       let a = Math.abs(op1.valueOf());
       let b = Math.abs(op2.valueOf());
       const isNeg = (op1.valueOf() * op2.valueOf()) < 0;
 
-      // Ensure 'a' is the larger operand to decompose
       if (a < b) { const tmp = a; a = b; b = tmp; }
 
-      // Decompose 'a' into tens and units
       let tens = Math.floor(a / 10) * 10;
       let units = a - tens;
       if (tens === 0) {
-        // If single digit, split into friendly 5 + remainder
         if (a > 5) { tens = 5; units = a - 5; }
         else { tens = a; units = 0; }
       }
@@ -695,28 +682,23 @@
             </linearGradient>
           </defs>
 
-          <!-- Height Label (Multiplier) -->
           <text x="20" y="${height / 2 + 25}" fill="#8b949e" font-size="14" font-weight="700" text-anchor="end" font-family="monospace">× ${b}</text>
 
-          <!-- Group 1: Tens Chunk -->
           <g style="transform-origin: 30px 20px; animation: barSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
             <rect x="30" y="20" width="${wTens}" height="${height}" rx="6" fill="url(#gradTens)" stroke="#388bfd" stroke-width="2"/>
             <text x="${30 + wTens / 2}" y="12" fill="#58a6ff" font-size="13" font-weight="700" text-anchor="middle" font-family="monospace">${tens}</text>
             <text x="${30 + wTens / 2}" y="${height / 2 + 25}" fill="#f0f6fc" font-size="15" font-weight="700" text-anchor="middle" font-family="monospace">${areaTens}</text>
           </g>
 
-          <!-- Group 2: Units Chunk -->
           ${units > 0 ? `
           <g style="transform-origin: ${30 + wTens}px 20px; animation: barSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);">
             <rect x="${30 + wTens}" y="20" width="${wUnits}" height="${height}" rx="6" fill="url(#gradUnits)" stroke="#2ea043" stroke-width="2"/>
             <text x="${30 + wTens + wUnits / 2}" y="12" fill="#3fb950" font-size="13" font-weight="700" text-anchor="middle" font-family="monospace">${units}</text>
             <text x="${30 + wTens + wUnits / 2}" y="${height / 2 + 25}" fill="#f0f6fc" font-size="15" font-weight="700" text-anchor="middle" font-family="monospace">${areaUnits}</text>
-            <!-- Animated Seam Divider -->
             <line x1="${30 + wTens}" y1="20" x2="${30 + wTens}" y2="${20 + height}" stroke="#fff" stroke-width="2" stroke-dasharray="4,4" style="animation: seamSlide 0.6s ease-out;"/>
           </g>
           ` : ''}
 
-          <!-- Total Result Bracket Underneath -->
           <path d="M 30 ${height + 28} L 30 ${height + 34} L ${30 + totalW} ${height + 34} L ${30 + totalW} ${height + 28}" fill="none" stroke="#8b949e" stroke-width="1.5"/>
           <text x="${30 + totalW / 2}" y="${height + 50}" fill="${isNeg ? '#f85149' : '#f0f6fc'}" font-size="14" font-weight="700" text-anchor="middle" font-family="monospace">
             ${units > 0 ? `${areaTens} + ${areaUnits} = ` : ''}${isNeg ? `-${answer.toFractionString()}` : answer.toFractionString()}
@@ -725,20 +707,14 @@
       `;
     },
 
-    /**
-     * Model 2: Dual-Dimensional Equivalence Gauge
-     * Replaces static fraction diagrams with twin calibrated continuous ribbons
-     * connected by a dynamic sweeping laser needle.
-     */
     renderDualGauge(target) {
       const val = Math.max(0, Math.min(2, Math.abs(target.valueOf())));
       const width = 440;
       const height = 120;
       const pad = 40;
       const usable = width - pad * 2;
-      const targetX = pad + (val / 1.0) * usable; // Scaled to 0..1 benchmark default
+      const targetX = pad + (val / 1.0) * usable;
 
-      // Benchmark ticks on top (Fractions)
       const fracs = [
         { x: pad, label: "0" },
         { x: pad + usable * 0.25, label: "1/4" },
@@ -747,7 +723,6 @@
         { x: pad + usable, label: "1" }
       ];
 
-      // Benchmark ticks on bottom (Decimals & %)
       const decs = [
         { x: pad, label: ".00" },
         { x: pad + usable * 0.25, label: ".25 (25%)" },
@@ -758,30 +733,23 @@
 
       return `
         <svg width="100%" height="${height + 20}" viewBox="0 0 ${width} ${height + 20}" style="overflow: visible;">
-          <!-- Top Scale Track (Fraction Ribbon) -->
           <rect x="${pad}" y="20" width="${usable}" height="14" rx="7" fill="rgba(88, 166, 255, 0.15)" stroke="#30363d"/>
-          <!-- Bottom Scale Track (Decimal Ribbon) -->
           <rect x="${pad}" y="70" width="${usable}" height="14" rx="7" fill="rgba(63, 185, 80, 0.15)" stroke="#30363d"/>
 
-          <!-- Top Ticks -->
           ${fracs.map(t => `
             <line x1="${t.x}" y1="14" x2="${t.x}" y2="34" stroke="#58a6ff" stroke-width="1.5" opacity="0.6"/>
             <text x="${t.x}" y="10" fill="#58a6ff" font-size="11" font-weight="600" text-anchor="middle" font-family="monospace">${t.label}</text>
           `).join('')}
 
-          <!-- Bottom Ticks -->
           ${decs.map(t => `
             <line x1="${t.x}" y1="70" x2="${t.x}" y2="90" stroke="#3fb950" stroke-width="1.5" opacity="0.6"/>
             <text x="${t.x}" y="104" fill="#3fb950" font-size="10" font-weight="600" text-anchor="middle" font-family="monospace">${t.label}</text>
           `).join('')}
 
-          <!-- Animated Sweeping Target Needle (Spans both ribbons simultaneously) -->
           <g style="transform-origin: ${pad}px center;">
             <line x1="${targetX}" y1="12" x2="${targetX}" y2="92" stroke="#fff" stroke-width="2.5" style="animation: pulseGlow 1.5s infinite; filter: drop-shadow(0 0 8px #58a6ff);"/>
-            <!-- Pin Nodes -->
             <circle cx="${targetX}" cy="27" r="5" fill="#58a6ff"/>
             <circle cx="${targetX}" cy="77" r="5" fill="#3fb950"/>
-            <!-- Target Callout Badge -->
             <rect x="${Math.max(10, Math.min(width - 130, targetX - 60))}" y="${height + 2}" width="120" height="22" rx="6" fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
             <text x="${Math.max(70, Math.min(width - 70, targetX))}" y="${height + 17}" fill="#fff" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">
               ${target.toFractionString()} ≡ ${target.toDecimalString(3)}
@@ -791,11 +759,6 @@
       `;
     },
 
-    /**
-     * Model 3: Signed Magnitude Neutralization Bar
-     * Replaces crowded 2-digit number lines. Vectors start from a central neutral origin (0).
-     * Opposing quantities visually collide, overlap, and neutralize their shared magnitude.
-     */
     renderSignedNeutralization(op1, op2, op, answer) {
       const v1 = op1.valueOf();
       const v2 = (op === "-") ? -op2.valueOf() : op2.valueOf();
@@ -811,18 +774,15 @@
       const w2 = scale(v2);
       const wAns = scale(ans);
 
-      // Determine neutralization overlap if signs oppose
       const signsOppose = (v1 * v2) < 0;
       const overlapMag = signsOppose ? Math.min(Math.abs(v1), Math.abs(v2)) : 0;
       const wOverlap = scale(overlapMag);
 
       return `
         <svg width="100%" height="${height + 30}" viewBox="0 0 ${width} ${height + 30}" style="overflow: visible;">
-          <!-- Neutral Origin Center Line (0 Axis) -->
           <line x1="${midX}" y1="10" x2="${midX}" y2="${height + 15}" stroke="#484f58" stroke-width="2" stroke-dasharray="4,4"/>
           <text x="${midX}" y="24" fill="#8b949e" font-size="12" font-weight="700" text-anchor="middle" font-family="monospace">0 (Neutral Origin)</text>
 
-          <!-- Vector 1 (Base Operand) -->
           <g style="animation: barSlideIn 0.35s ease-out; transform-origin: ${midX}px 40px;">
             <rect x="${v1 >= 0 ? midX : midX + w1}" y="35" width="${Math.abs(w1)}" height="22" rx="4"
                   fill="${v1 >= 0 ? 'rgba(63, 185, 80, 0.4)' : 'rgba(248, 81, 73, 0.4)'}"
@@ -832,7 +792,6 @@
             </text>
           </g>
 
-          <!-- Vector 2 (Attached Operation) -->
           <g style="animation: barSlideIn 0.55s ease-out; transform-origin: ${midX + w1}px 65px;">
             <rect x="${v2 >= 0 ? midX + w1 : midX + w1 + w2}" y="62" width="${Math.abs(w2)}" height="22" rx="4"
                   fill="${v2 >= 0 ? 'rgba(63, 185, 80, 0.35)' : 'rgba(248, 81, 73, 0.35)'}"
@@ -842,7 +801,6 @@
             </text>
           </g>
 
-          <!-- Overlap Neutralization Glow (Zero-Pairs Cancelling Out) -->
           ${signsOppose && overlapMag > 0 ? `
             <rect x="${midX - (v1 < 0 ? wOverlap : 0)}" y="35" width="${wOverlap}" height="49" rx="4"
                   fill="none" stroke="#d29922" stroke-width="2" style="animation: dissolveNegation 1.2s infinite;"/>
@@ -851,7 +809,6 @@
             </text>
           ` : ''}
 
-          <!-- Net Result Vector -->
           <g style="animation: pulseGlow 1.8s infinite;">
             <line x1="${midX}" y1="${height - 8}" x2="${midX + wAns}" y2="${height - 8}"
                   stroke="${ans >= 0 ? '#3fb950' : '#f85149'}" stroke-width="4"/>
@@ -884,6 +841,7 @@
     accumulatedActiveMs: 0,
     currentProblem: null,
     inVisualModal: false,
+    modalOpenedAt: 0, // Debounce guard timestamp
 
     trialTimerRaf: null,
     trialTimerDurationMs: 8000,
@@ -933,7 +891,6 @@
     summarySessionDesc: document.getElementById("summary-session-desc")
   };
 
-  // --- Dynamic Problem Synthesis ---
   function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
@@ -986,7 +943,6 @@
       const isFrac = (lvl > 2.8) && Math.random() < Math.min(0.65, (lvl - 2.5) * 0.2);
       const isNeg = allowNegatives && Math.random() < 0.35;
       if (!isFrac) {
-        // Multi-digit numbers up to 99 enabled as level climbs
         let max = lvl < 3 ? 9 : (lvl < 6 ? 35 : 99);
         let val = getRandomInt(1, max);
         return new Rational(isNeg ? -val : val, 1);
@@ -1040,7 +996,6 @@
       displayString = `${renderOp(op1)} ${opSymbols[op]} ${renderOp(op2)}`;
     }
 
-    // Dynamic model selection based on cognitive structure of problem
     let modelType = "neutralization";
     if (op === "*" || op === "/") {
       modelType = "area";
@@ -1062,7 +1017,6 @@
     };
   }
 
-  // --- Multi-format Parser ---
   function parseUserAnswer(inputStr) {
     if (!inputStr) return null;
     let s = inputStr.trim().toLowerCase().replace(/\s+/g, "");
@@ -1095,7 +1049,6 @@
     return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   }
 
-  // --- Trial Timer Engine ---
   function startTrialTimer(durationMs) {
     cancelTrialTimer();
     state.trialTimerDurationMs = durationMs;
@@ -1131,7 +1084,6 @@
     }
   }
 
-  // --- Session Master Timer ---
   function startSessionTimer() {
     state.lastSessionTick = performance.now();
     elements.sessionPill.style.display = "inline-block";
@@ -1154,7 +1106,6 @@
     }, 250);
   }
 
-  // --- Session State Controls ---
   function startSession() {
     state.hasStarted = true;
     state.isFinished = false;
@@ -1226,9 +1177,9 @@
     elements.summaryOverlay.style.display = "flex";
   }
 
-  // --- Display Dimensional Mental Model ---
   function showVisualization(problem, reasonTitle) {
     state.inVisualModal = true;
+    state.modalOpenedAt = performance.now(); // Record timestamp for debounce guard
     cancelTrialTimer();
 
     let visHtml = "";
@@ -1258,7 +1209,6 @@
     if (!state.isFinished) nextTrial();
   }
 
-  // --- Adaptivity Logic ---
   function recordTrial(isCorrect, latencyMs, isTimeout = false) {
     state.totalAnswered++;
     state.latencies.push(latencyMs);
@@ -1294,8 +1244,12 @@
 
   function submitCurrentAnswer() {
     if (!state.hasStarted || state.isPaused || state.isFinished) return;
+    
+    // If currently studying a mental model, submit keypress advances past it
     if (state.inVisualModal) {
-      hideVisualization();
+      if (performance.now() - state.modalOpenedAt > 250) {
+        hideVisualization();
+      }
       return;
     }
 
@@ -1317,7 +1271,6 @@
     }
   }
 
-  // --- UI Updates ---
   function getTierLabel(lvl) {
     if (lvl < 2.5) return "Tier 1 • Foundations";
     if (lvl < 5.0) return "Tier 2 • Signed & Multi-Digit";
@@ -1362,7 +1315,7 @@
     startTrialTimer(trial.estimatedSec * 1000);
   }
 
-  // --- Event Handling ---
+  // --- Duration Picker ---
   elements.durationSelector.addEventListener("click", (e) => {
     const btn = e.target.closest(".duration-btn");
     if (!btn) return;
@@ -1388,14 +1341,17 @@
     renderStats();
   });
 
+  // --- Unified Form and Key Handling ---
   elements.answerForm.addEventListener("submit", (e) => {
     e.preventDefault();
     submitCurrentAnswer();
   });
 
+  // Keydown listener for answerInput: Intercepts Space and Enter symmetrically
   elements.answerInput.addEventListener("keydown", (e) => {
-    if (e.code === "Space") {
+    if (e.code === "Space" || e.code === "Enter") {
       e.preventDefault();
+      e.stopPropagation(); // Prevents bubbling to window so it doesn't instantly dismiss the modal it triggers
       submitCurrentAnswer();
     }
   });
@@ -1404,25 +1360,33 @@
     if (state.inVisualModal) hideVisualization();
   });
 
+  // Global Window Shortcuts
   window.addEventListener("keydown", (e) => {
+    // 1. Start session on landing screen
     if (!state.hasStarted && !state.isFinished && (e.code === "Space" || e.code === "Enter")) {
       e.preventDefault();
       startSession();
       return;
     }
 
+    // 2. Toggle pause
     if (state.hasStarted && !state.inVisualModal && !state.isFinished && (e.code === "KeyP" || e.code === "Escape")) {
       e.preventDefault();
       togglePause();
       return;
     }
 
+    // 3. Dismiss mental model visualizer (Guarded by 250ms debounce)
     if (state.inVisualModal && (e.code === "Space" || e.code === "Enter")) {
+      if (performance.now() - state.modalOpenedAt < 250) {
+        return; // Guard against keystroke carry-over
+      }
       e.preventDefault();
       hideVisualization();
       return;
     }
 
+    // 4. Restart session after completion
     if (state.isFinished && (e.code === "Space" || e.code === "Enter")) {
       e.preventDefault();
       elements.restartBtn.click();
