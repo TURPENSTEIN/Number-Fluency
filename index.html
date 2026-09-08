@@ -45,7 +45,7 @@
     gap: 1.25rem;
   }
 
-  /* Header & Control Bar */
+  /* Top Control Bar */
   .top-bar {
     display: flex;
     justify-content: space-between;
@@ -54,10 +54,24 @@
   }
 
   .app-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
     letter-spacing: 0.05em;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .session-pill {
+    background: rgba(88, 166, 255, 0.12);
+    color: var(--accent);
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    display: none;
   }
 
   .pause-btn {
@@ -80,6 +94,7 @@
     border-color: #8b949e;
   }
 
+  /* Stats Bar */
   .header-card {
     background: var(--surface);
     border: 1px solid var(--surface-border);
@@ -118,7 +133,7 @@
     text-align: center;
     position: relative;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    min-height: 290px;
+    min-height: 310px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -234,7 +249,7 @@
 
   .submit-btn:hover { opacity: 0.9; }
 
-  /* Overlay System (Start & Pause) */
+  /* Overlay System */
   .overlay {
     position: absolute;
     inset: 0;
@@ -252,15 +267,55 @@
   .overlay-title {
     font-size: 1.55rem;
     font-weight: 700;
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.5rem;
   }
 
   .overlay-desc {
-    font-size: 0.92rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
-    max-width: 460px;
-    margin-bottom: 1.6rem;
+    max-width: 480px;
+    margin-bottom: 1.25rem;
     line-height: 1.5;
+  }
+
+  /* Duration Selector Tabs */
+  .duration-picker-label {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+
+  .duration-selector {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .duration-btn {
+    background: #0d1117;
+    border: 1px solid var(--surface-border);
+    color: var(--text-secondary);
+    padding: 0.55rem 1.1rem;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .duration-btn:hover {
+    border-color: #8b949e;
+    color: var(--text-primary);
+  }
+
+  .duration-btn.active {
+    background: rgba(88, 166, 255, 0.15);
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   .big-btn {
@@ -270,7 +325,7 @@
     border-radius: 8px;
     font-size: 1.1rem;
     font-weight: 700;
-    padding: 0.8rem 2.2rem;
+    padding: 0.75rem 2.2rem;
     cursor: pointer;
     box-shadow: 0 4px 18px var(--accent-glow);
     transition: transform 0.15s, opacity 0.15s;
@@ -280,6 +335,27 @@
     transform: scale(1.02);
     opacity: 0.95;
   }
+
+  /* Summary Grid */
+  .summary-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    width: 100%;
+    max-width: 380px;
+    margin: 1.2rem 0 1.6rem;
+    text-align: left;
+  }
+
+  .summary-item {
+    background: #090d13;
+    border: 1px solid var(--surface-border);
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+  }
+
+  .summary-item .stat-label { margin-bottom: 0.2rem; }
+  .summary-item .stat-value { font-size: 1.25rem; }
 
   /* Mental Model Visualizer Panel */
   .visualization-container {
@@ -320,9 +396,7 @@
     line-height: 1.4;
   }
 
-  .vis-actions {
-    margin-top: 1rem;
-  }
+  .vis-actions { margin-top: 1rem; }
 
   .continue-btn {
     background: var(--surface-border);
@@ -380,9 +454,12 @@
 <body>
 
 <div class="container">
-  <!-- Top Title & Pause Bar -->
+  <!-- Top Bar -->
   <div class="top-bar">
-    <div class="app-title">QUANTITATIVE WORKING MEMORY TRAINER</div>
+    <div class="app-title">
+      <span>COGNITIVE NUMBER FLUENCY</span>
+      <span class="session-pill" id="session-pill">10:00</span>
+    </div>
     <button type="button" class="pause-btn" id="pause-btn" style="display: none;">
       <span id="pause-icon">⏸</span> <span id="pause-text">Pause</span> <span class="kbd">P / Esc</span>
     </button>
@@ -408,7 +485,7 @@
     </div>
   </div>
 
-  <!-- Problem Arena -->
+  <!-- Arena -->
   <div class="arena" id="arena">
     <div class="timer-track"><div class="timer-progress" id="timer-bar"></div></div>
     
@@ -416,7 +493,7 @@
     <span class="mode-badge" id="mode-badge">Ready</span>
 
     <div class="prompt-label" id="prompt-label">Cognitive Operation</div>
-    <div class="expression-display" id="problem-display">Press Start When Ready</div>
+    <div class="expression-display" id="problem-display">Select duration & start</div>
 
     <form class="input-form" id="answer-form" autocomplete="off">
       <input type="text" id="answer-input" class="answer-input" placeholder="?" disabled />
@@ -436,31 +513,68 @@
     </div>
 
     <div class="helper-text" id="helper-text">
-      Accepts fractions (<span class="kbd">3/4</span>), decimals (<span class="kbd">0.75</span>), percentages (<span class="kbd">75%</span>), or integers (<span class="kbd">-8</span>).
+      Submit with <span class="kbd">Space</span> or <span class="kbd">Enter</span>. Accepts fractions (<span class="kbd">3/4</span>), decimals (<span class="kbd">0.75</span>), or integers (<span class="kbd">-8</span>).
     </div>
 
-    <!-- 1. Landing / Start Screen Overlay -->
+    <!-- 1. Landing Screen Overlay -->
     <div class="overlay" id="start-overlay">
       <h2 class="overlay-title">Number Fluency Practice</h2>
       <p class="overlay-desc">
-        Strengthen automatic number sense across 4 operations, signed integers, fractions, decimals, and verbal translations. The timer and difficulty dynamically adapt to your performance.
+        Strengthen automatic number sense across 4 operations, signed numbers, fractions, decimals, and verbal translations.
       </p>
+
+      <div class="duration-picker-label">Choose Session Length</div>
+      <div class="duration-selector" id="duration-selector">
+        <button type="button" class="duration-btn active" data-minutes="10">10 Min</button>
+        <button type="button" class="duration-btn" data-minutes="20">20 Min</button>
+        <button type="button" class="duration-btn" data-minutes="30">30 Min</button>
+      </div>
+
       <button type="button" class="big-btn" id="start-btn">Start Training</button>
     </div>
 
-    <!-- 2. Pause Screen Overlay -->
+    <!-- 2. Pause Overlay -->
     <div class="overlay" id="pause-overlay" style="display: none;">
       <h2 class="overlay-title">Training Paused</h2>
       <p class="overlay-desc">
-        Your timer is frozen. Latency and adaptive ratings will resume smoothly when you're ready.
+        Both your trial timer and total session clock are frozen. Latency and adaptive ratings remain protected.
       </p>
       <button type="button" class="big-btn" id="resume-btn">Resume</button>
     </div>
+
+    <!-- 3. Session Complete Overlay -->
+    <div class="overlay" id="summary-overlay" style="display: none;">
+      <h2 class="overlay-title">Session Complete! 🎉</h2>
+      <p class="overlay-desc" id="summary-session-desc">
+        Great working memory conditioning workout. Here is your fluency breakdown:
+      </p>
+
+      <div class="summary-stats">
+        <div class="summary-item">
+          <div class="stat-label">Total Solved</div>
+          <div class="stat-value accent" id="sum-solved">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="stat-label">Accuracy</div>
+          <div class="stat-value warning" id="sum-accuracy">100%</div>
+        </div>
+        <div class="summary-item">
+          <div class="stat-label">Best Streak</div>
+          <div class="stat-value success" id="sum-streak">0</div>
+        </div>
+        <div class="summary-item">
+          <div class="stat-label">End Level</div>
+          <div class="stat-value accent" id="sum-level">1.0</div>
+        </div>
+      </div>
+
+      <button type="button" class="big-btn" id="restart-btn">Train Again</button>
+    </div>
   </div>
 
-  <!-- Cognitive Info Footer -->
+  <!-- Footer Info -->
   <div class="info-panel">
-    <strong>Flow State Control:</strong> You can pause anytime by pressing <span class="kbd">P</span> or <span class="kbd">Esc</span>. Incorrect answers or timeouts will pause the timer and reveal an intuitive visual model (Tape diagram, 100-Grid, or Number line vector) to solidify your mental schemas.
+    <strong>Fast Retrieval Controls:</strong> You can submit answers instantly using <span class="kbd">Space</span> or <span class="kbd">Enter</span>. Pause anytime with <span class="kbd">P</span> or <span class="kbd">Esc</span>.
   </div>
 </div>
 
@@ -486,12 +600,7 @@
     valueOf() { return this.n / this.d; }
     isInteger() { return this.d === 1; }
     toFractionString() { return this.d === 1 ? `${this.n}` : `${this.n}/${this.d}`; }
-    toDecimalString(maxDec = 3) {
-      return `${Number(this.valueOf().toFixed(maxDec))}`;
-    }
-    toPercentString(maxDec = 1) {
-      return `${Number((this.valueOf() * 100).toFixed(maxDec))}%`;
-    }
+    toDecimalString(maxDec = 3) { return `${Number(this.valueOf().toFixed(maxDec))}`; }
   }
 
   // --- Verbal Conversion Utilities ---
@@ -549,24 +658,33 @@
 
   // --- App State ---
   const state = {
+    selectedMinutes: 10,
     hasStarted: false,
     isPaused: false,
+    isFinished: false,
     level: 1.0,
     streak: 0,
+    bestStreak: 0,
     totalAnswered: 0,
     totalCorrect: 0,
     latencies: [],
+    
+    // Problem latency tracking
     trialStartTime: null,
     accumulatedActiveMs: 0,
-    pauseStartTime: null,
     currentProblem: null,
     inVisualModal: false,
-    
-    // Timer tracking
-    timerRaf: null,
-    timerDurationMs: 8000,
-    timerRemainingMs: 8000,
-    timerEndStamp: null
+
+    // Trial countdown timer
+    trialTimerRaf: null,
+    trialTimerDurationMs: 8000,
+    trialTimerRemainingMs: 8000,
+    trialTimerEndStamp: null,
+
+    // Overall Session Timer
+    sessionRemainingMs: 10 * 60 * 1000,
+    sessionIntervalId: null,
+    lastSessionTick: null
   };
 
   const elements = {
@@ -584,6 +702,7 @@
     submitBtn: document.getElementById("submit-btn"),
     feedback: document.getElementById("feedback"),
     timerBar: document.getElementById("timer-bar"),
+    sessionPill: document.getElementById("session-pill"),
     visContainer: document.getElementById("vis-container"),
     visTitle: document.getElementById("vis-title"),
     visGraphic: document.getElementById("vis-graphic"),
@@ -595,10 +714,18 @@
     startOverlay: document.getElementById("start-overlay"),
     startBtn: document.getElementById("start-btn"),
     pauseOverlay: document.getElementById("pause-overlay"),
-    resumeBtn: document.getElementById("resume-btn")
+    resumeBtn: document.getElementById("resume-btn"),
+    summaryOverlay: document.getElementById("summary-overlay"),
+    restartBtn: document.getElementById("restart-btn"),
+    durationSelector: document.getElementById("duration-selector"),
+    sumSolved: document.getElementById("sum-solved"),
+    sumAccuracy: document.getElementById("sum-accuracy"),
+    sumStreak: document.getElementById("sum-streak"),
+    sumLevel: document.getElementById("sum-level"),
+    summarySessionDesc: document.getElementById("summary-session-desc")
   };
 
-  // --- SVG Visualizers ---
+  // --- Visualizers ---
   const Visualizers = {
     renderNumberLine(target, start = 0, delta = null) {
       const val = target.valueOf();
@@ -664,7 +791,6 @@
         const y = row * (cellSize + gap);
         rects += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" fill="${i < filledCount ? '#58a6ff' : 'rgba(255, 255, 255, 0.08)'}" />`;
       }
-
       return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${rects}</svg>`;
     },
 
@@ -743,7 +869,6 @@
       }
     }
 
-    // Arithmetic
     const allowNegatives = lvl >= 1.7;
     let ops = ["+", "-"];
     if (lvl >= 2.2) ops.push("*");
@@ -817,9 +942,7 @@
     return {
       type: "arithmetic",
       prompt: "Evaluate",
-      op1,
-      op2,
-      op,
+      op1, op2, op,
       displayString,
       answer,
       isVerbal,
@@ -856,63 +979,96 @@
     return Math.abs(userVal - targetRational.valueOf()) < 0.02;
   }
 
-  // --- Precision Timer Engine ---
-  function startTimer(durationMs) {
-    cancelTimer();
-    state.timerDurationMs = durationMs;
-    state.timerRemainingMs = durationMs;
-    state.timerEndStamp = performance.now() + durationMs;
+  // --- Format MM:SS ---
+  function formatTime(ms) {
+    const totalSec = Math.max(0, Math.ceil(ms / 1000));
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  }
+
+  // --- Trial Timer Engine ---
+  function startTrialTimer(durationMs) {
+    cancelTrialTimer();
+    state.trialTimerDurationMs = durationMs;
+    state.trialTimerRemainingMs = durationMs;
+    state.trialTimerEndStamp = performance.now() + durationMs;
 
     elements.timerBar.classList.remove("urgent");
     elements.timerBar.style.width = "100%";
 
     function tick(now) {
-      if (state.isPaused) return;
+      if (state.isPaused || state.isFinished) return;
 
-      const rem = Math.max(0, state.timerEndStamp - now);
-      state.timerRemainingMs = rem;
-      const frac = rem / state.timerDurationMs;
+      const rem = Math.max(0, state.trialTimerEndStamp - now);
+      state.trialTimerRemainingMs = rem;
+      const frac = rem / state.trialTimerDurationMs;
       elements.timerBar.style.width = `${(frac * 100).toFixed(2)}%`;
 
-      if (frac < 0.28) {
-        elements.timerBar.classList.add("urgent");
-      }
+      if (frac < 0.28) elements.timerBar.classList.add("urgent");
 
       if (rem <= 0) {
         handleTimeout();
       } else {
-        state.timerRaf = requestAnimationFrame(tick);
+        state.trialTimerRaf = requestAnimationFrame(tick);
       }
     }
-    state.timerRaf = requestAnimationFrame(tick);
+    state.trialTimerRaf = requestAnimationFrame(tick);
   }
 
-  function cancelTimer() {
-    if (state.timerRaf) {
-      cancelAnimationFrame(state.timerRaf);
-      state.timerRaf = null;
+  function cancelTrialTimer() {
+    if (state.trialTimerRaf) {
+      cancelAnimationFrame(state.trialTimerRaf);
+      state.trialTimerRaf = null;
     }
   }
 
-  // --- Session State Controls (Start, Pause, Resume) ---
+  // --- Session Timer Engine ---
+  function startSessionTimer() {
+    state.lastSessionTick = performance.now();
+    elements.sessionPill.style.display = "inline-block";
+    elements.sessionPill.textContent = formatTime(state.sessionRemainingMs);
+
+    clearInterval(state.sessionIntervalId);
+    state.sessionIntervalId = setInterval(() => {
+      if (state.isPaused || state.isFinished) return;
+
+      const now = performance.now();
+      const delta = now - state.lastSessionTick;
+      state.lastSessionTick = now;
+
+      state.sessionRemainingMs = Math.max(0, state.sessionRemainingMs - delta);
+      elements.sessionPill.textContent = formatTime(state.sessionRemainingMs);
+
+      if (state.sessionRemainingMs <= 0) {
+        endSession();
+      }
+    }, 250);
+  }
+
+  // --- Session State Controls ---
   function startSession() {
     state.hasStarted = true;
+    state.isFinished = false;
+    state.sessionRemainingMs = state.selectedMinutes * 60 * 1000;
+    
     elements.startOverlay.style.display = "none";
+    elements.summaryOverlay.style.display = "none";
     elements.pauseBtn.style.display = "flex";
     elements.answerInput.disabled = false;
     elements.submitBtn.disabled = false;
+
+    startSessionTimer();
     nextTrial();
   }
 
   function pauseSession() {
-    if (!state.hasStarted || state.isPaused || state.inVisualModal) return;
+    if (!state.hasStarted || state.isPaused || state.inVisualModal || state.isFinished) return;
 
     state.isPaused = true;
-    cancelTimer();
+    cancelTrialTimer();
 
-    // Accumulate solving time prior to pause
     state.accumulatedActiveMs += performance.now() - state.trialStartTime;
-    state.pauseStartTime = performance.now();
 
     elements.pauseOverlay.style.display = "flex";
     elements.pauseText.textContent = "Resume";
@@ -921,7 +1077,7 @@
   }
 
   function resumeSession() {
-    if (!state.isPaused) return;
+    if (!state.isPaused || state.isFinished) return;
 
     state.isPaused = false;
     elements.pauseOverlay.style.display = "none";
@@ -930,28 +1086,48 @@
     elements.answerInput.disabled = false;
     elements.answerInput.focus();
 
-    // Resume latency clock
     state.trialStartTime = performance.now();
+    state.lastSessionTick = performance.now();
 
-    // Resume countdown with exact remaining slice
-    startTimer(state.timerRemainingMs);
+    startTrialTimer(state.trialTimerRemainingMs);
   }
 
   function togglePause() {
-    if (!state.hasStarted) return;
+    if (!state.hasStarted || state.isFinished) return;
     if (state.isPaused) resumeSession();
     else pauseSession();
+  }
+
+  function endSession() {
+    state.isFinished = true;
+    cancelTrialTimer();
+    clearInterval(state.sessionIntervalId);
+
+    elements.pauseBtn.style.display = "none";
+    elements.visContainer.style.display = "none";
+    elements.answerInput.disabled = true;
+    elements.submitBtn.disabled = true;
+
+    // Fill Summary
+    elements.summarySessionDesc.textContent = `Completed your ${state.selectedMinutes}-minute fluency workout!`;
+    elements.sumSolved.textContent = `${state.totalAnswered}`;
+    const acc = state.totalAnswered > 0 ? Math.round((state.totalCorrect / state.totalAnswered) * 100) : 100;
+    elements.sumAccuracy.textContent = `${acc}%`;
+    elements.sumStreak.textContent = `${state.bestStreak}`;
+    elements.sumLevel.textContent = state.level.toFixed(1);
+
+    elements.summaryOverlay.style.display = "flex";
   }
 
   // --- Visual Model Display ---
   function showVisualization(problem, reasonTitle) {
     state.inVisualModal = true;
-    cancelTimer();
+    cancelTrialTimer();
 
     const target = problem.answer;
     let visHtml = "";
-
     const visType = problem.recommendedVis;
+
     if (visType === "hundred" && target.valueOf() >= 0 && target.valueOf() <= 1) {
       elements.visTitle.textContent = "Mental Model • Base-10 Hundredths Area";
       visHtml = Visualizers.renderHundredGrid(target);
@@ -975,7 +1151,7 @@
     elements.visContainer.style.display = "none";
     elements.answerInput.disabled = false;
     state.inVisualModal = false;
-    nextTrial();
+    if (!state.isFinished) nextTrial();
   }
 
   // --- Adaptivity Logic ---
@@ -987,6 +1163,8 @@
     if (isCorrect && !isTimeout) {
       state.totalCorrect++;
       state.streak++;
+      if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+
       let delta = 0.15;
       if (latencyMs < 2000) delta = 0.35;
       else if (latencyMs < 3000) delta = 0.22;
@@ -1001,8 +1179,8 @@
   }
 
   function handleTimeout() {
-    cancelTimer();
-    const latency = state.timerDurationMs;
+    cancelTrialTimer();
+    const latency = state.trialTimerDurationMs;
     recordTrial(false, latency, true);
 
     elements.feedback.className = "feedback error";
@@ -1010,17 +1188,24 @@
     showVisualization(state.currentProblem, "Time Expired");
   }
 
-  function handleAnswer(userVal) {
-    cancelTimer();
+  function submitCurrentAnswer() {
+    if (!state.hasStarted || state.isPaused || state.isFinished) return;
+    if (state.inVisualModal) {
+      hideVisualization();
+      return;
+    }
+
+    cancelTrialTimer();
     const totalLatency = state.accumulatedActiveMs + (performance.now() - state.trialStartTime);
-    const isCorrect = answersMatch(userVal, state.currentProblem.answer);
+    const val = parseUserAnswer(elements.answerInput.value);
+    const isCorrect = answersMatch(val, state.currentProblem.answer);
 
     recordTrial(isCorrect, totalLatency, false);
 
     if (isCorrect) {
       elements.feedback.className = "feedback success";
       elements.feedback.textContent = `✓ Fluent! (${(totalLatency / 1000).toFixed(2)}s)`;
-      setTimeout(nextTrial, 650);
+      setTimeout(() => { if (!state.isFinished) nextTrial(); }, 600);
     } else {
       elements.feedback.className = "feedback error";
       elements.feedback.textContent = `Incorrect`;
@@ -1051,6 +1236,8 @@
   }
 
   function nextTrial() {
+    if (state.isFinished) return;
+
     elements.visContainer.style.display = "none";
     elements.answerInput.disabled = false;
     elements.feedback.textContent = "";
@@ -1068,39 +1255,65 @@
     elements.answerInput.value = "";
     elements.answerInput.focus();
 
-    startTimer(trial.estimatedSec * 1000);
+    startTrialTimer(trial.estimatedSec * 1000);
   }
 
   // --- Event Handling ---
+  // Duration Picker Buttons
+  elements.durationSelector.addEventListener("click", (e) => {
+    const btn = e.target.closest(".duration-btn");
+    if (!btn) return;
+    elements.durationSelector.querySelectorAll(".duration-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    state.selectedMinutes = parseInt(btn.dataset.minutes, 10);
+  });
+
   elements.startBtn.addEventListener("click", startSession);
   elements.resumeBtn.addEventListener("click", resumeSession);
   elements.pauseBtn.addEventListener("click", togglePause);
 
+  elements.restartBtn.addEventListener("click", () => {
+    elements.summaryOverlay.style.display = "none";
+    elements.startOverlay.style.display = "flex";
+    state.hasStarted = false;
+    state.isFinished = false;
+    state.streak = 0;
+    state.bestStreak = 0;
+    state.totalAnswered = 0;
+    state.totalCorrect = 0;
+    state.latencies = [];
+    renderStats();
+  });
+
+  // Submit via Enter Form Submission
   elements.answerForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (!state.hasStarted || state.isPaused) return;
-    if (state.inVisualModal) {
-      hideVisualization();
-      return;
+    submitCurrentAnswer();
+  });
+
+  // Feature: Space-to-Submit inside the answer input
+  elements.answerInput.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+      e.preventDefault(); // Prevent adding a space character
+      submitCurrentAnswer();
     }
-    const val = parseUserAnswer(elements.answerInput.value);
-    handleAnswer(val);
   });
 
   elements.continueBtn.addEventListener("click", () => {
     if (state.inVisualModal) hideVisualization();
   });
 
+  // Global Keyboard Shortcuts
   window.addEventListener("keydown", (e) => {
     // Start session with Space or Enter on landing screen
-    if (!state.hasStarted && (e.code === "Space" || e.code === "Enter")) {
+    if (!state.hasStarted && !state.isFinished && (e.code === "Space" || e.code === "Enter")) {
       e.preventDefault();
       startSession();
       return;
     }
 
-    // Toggle pause with P or Escape (unless reviewing a visualization)
-    if (state.hasStarted && !state.inVisualModal && (e.code === "KeyP" || e.code === "Escape")) {
+    // Toggle pause with P or Escape
+    if (state.hasStarted && !state.inVisualModal && !state.isFinished && (e.code === "KeyP" || e.code === "Escape")) {
       e.preventDefault();
       togglePause();
       return;
@@ -1110,6 +1323,13 @@
     if (state.inVisualModal && (e.code === "Space" || e.code === "Enter")) {
       e.preventDefault();
       hideVisualization();
+      return;
+    }
+
+    // Restart after session completion
+    if (state.isFinished && (e.code === "Space" || e.code === "Enter")) {
+      e.preventDefault();
+      elements.restartBtn.click();
     }
   });
 
