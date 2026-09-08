@@ -45,7 +45,41 @@
     gap: 1.25rem;
   }
 
-  /* Stats Bar */
+  /* Header & Control Bar */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0.25rem;
+  }
+
+  .app-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+  }
+
+  .pause-btn {
+    background: #21262d;
+    color: var(--text-primary);
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.15s;
+  }
+
+  .pause-btn:hover {
+    background: #30363d;
+    border-color: #8b949e;
+  }
+
   .header-card {
     background: var(--surface);
     border: 1px solid var(--surface-border);
@@ -80,14 +114,18 @@
     background: var(--surface);
     border: 1px solid var(--surface-border);
     border-radius: 16px;
-    padding: 2.2rem 1.5rem 1.5rem;
+    padding: 2.5rem 1.5rem 1.5rem;
     text-align: center;
     position: relative;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    min-height: 290px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     overflow: hidden;
   }
 
-  /* Adaptive Timer Bar */
+  /* Timer Track */
   .timer-track {
     position: absolute;
     top: 0;
@@ -104,9 +142,7 @@
     transition: width 0.08s linear, background-color 0.3s ease;
   }
 
-  .timer-progress.urgent {
-    background: var(--error);
-  }
+  .timer-progress.urgent { background: var(--error); }
 
   .level-badge {
     position: absolute;
@@ -198,30 +234,57 @@
 
   .submit-btn:hover { opacity: 0.9; }
 
-  /* Feedback & Guidance */
-  .feedback {
-    min-height: 2rem;
-    margin-top: 0.8rem;
-    font-size: 0.95rem;
-    font-weight: 500;
+  /* Overlay System (Start & Pause) */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(22, 27, 34, 0.96);
+    backdrop-filter: blur(6px);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 2rem;
+    z-index: 20;
+    animation: fadeIn 0.2s ease-out;
   }
 
-  .feedback.success { color: var(--success); }
-  .feedback.error { color: var(--error); }
+  .overlay-title {
+    font-size: 1.55rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+  }
 
-  .helper-text {
-    font-size: 0.78rem;
+  .overlay-desc {
+    font-size: 0.92rem;
     color: var(--text-secondary);
-    margin-top: 0.5rem;
+    max-width: 460px;
+    margin-bottom: 1.6rem;
+    line-height: 1.5;
+  }
+
+  .big-btn {
+    background: var(--accent);
+    color: #0d1117;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 0.8rem 2.2rem;
+    cursor: pointer;
+    box-shadow: 0 4px 18px var(--accent-glow);
+    transition: transform 0.15s, opacity 0.15s;
+  }
+
+  .big-btn:hover {
+    transform: scale(1.02);
+    opacity: 0.95;
   }
 
   /* Mental Model Visualizer Panel */
   .visualization-container {
     display: none;
-    margin-top: 1.2rem;
+    margin-top: 1rem;
     padding: 1.2rem;
     background: #090d13;
     border: 1px solid var(--surface-border);
@@ -272,8 +335,25 @@
     font-weight: 600;
   }
 
-  .continue-btn:hover {
-    background: #30363d;
+  .continue-btn:hover { background: #30363d; }
+
+  .feedback {
+    min-height: 1.8rem;
+    margin-top: 0.75rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feedback.success { color: var(--success); }
+  .feedback.error { color: var(--error); }
+
+  .helper-text {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.5rem;
   }
 
   .kbd {
@@ -300,6 +380,14 @@
 <body>
 
 <div class="container">
+  <!-- Top Title & Pause Bar -->
+  <div class="top-bar">
+    <div class="app-title">QUANTITATIVE WORKING MEMORY TRAINER</div>
+    <button type="button" class="pause-btn" id="pause-btn" style="display: none;">
+      <span id="pause-icon">⏸</span> <span id="pause-text">Pause</span> <span class="kbd">P / Esc</span>
+    </button>
+  </div>
+
   <!-- Stats Header -->
   <div class="header-card">
     <div>
@@ -325,19 +413,19 @@
     <div class="timer-track"><div class="timer-progress" id="timer-bar"></div></div>
     
     <span class="level-badge" id="tier-badge">Tier 1 • Foundations</span>
-    <span class="mode-badge" id="mode-badge">Numerical</span>
+    <span class="mode-badge" id="mode-badge">Ready</span>
 
-    <div class="prompt-label" id="prompt-label">Evaluate</div>
-    <div class="expression-display" id="problem-display">Loading...</div>
+    <div class="prompt-label" id="prompt-label">Cognitive Operation</div>
+    <div class="expression-display" id="problem-display">Press Start When Ready</div>
 
     <form class="input-form" id="answer-form" autocomplete="off">
-      <input type="text" id="answer-input" class="answer-input" placeholder="?" autofocus />
-      <button type="submit" class="submit-btn" id="submit-btn">Enter</button>
+      <input type="text" id="answer-input" class="answer-input" placeholder="?" disabled />
+      <button type="submit" class="submit-btn" id="submit-btn" disabled>Enter</button>
     </form>
 
     <div class="feedback" id="feedback"></div>
 
-    <!-- Mental Model Visualizer Panel -->
+    <!-- Mental Model Visualizer -->
     <div class="visualization-container" id="vis-container">
       <div class="vis-title" id="vis-title">Mental Model Insight</div>
       <div class="vis-graphic" id="vis-graphic"></div>
@@ -350,11 +438,29 @@
     <div class="helper-text" id="helper-text">
       Accepts fractions (<span class="kbd">3/4</span>), decimals (<span class="kbd">0.75</span>), percentages (<span class="kbd">75%</span>), or integers (<span class="kbd">-8</span>).
     </div>
+
+    <!-- 1. Landing / Start Screen Overlay -->
+    <div class="overlay" id="start-overlay">
+      <h2 class="overlay-title">Number Fluency Practice</h2>
+      <p class="overlay-desc">
+        Strengthen automatic number sense across 4 operations, signed integers, fractions, decimals, and verbal translations. The timer and difficulty dynamically adapt to your performance.
+      </p>
+      <button type="button" class="big-btn" id="start-btn">Start Training</button>
+    </div>
+
+    <!-- 2. Pause Screen Overlay -->
+    <div class="overlay" id="pause-overlay" style="display: none;">
+      <h2 class="overlay-title">Training Paused</h2>
+      <p class="overlay-desc">
+        Your timer is frozen. Latency and adaptive ratings will resume smoothly when you're ready.
+      </p>
+      <button type="button" class="big-btn" id="resume-btn">Resume</button>
+    </div>
   </div>
 
-  <!-- Adaptive Info -->
+  <!-- Cognitive Info Footer -->
   <div class="info-panel">
-    <strong>Dual Engine:</strong> The timer adapts to your speed and level rating. Missing an answer or timing out displays an intuitive visual mental model (Number Line vector, 100-Grid percentage area, or Segmented Tape diagram) to solidify intuitive schema retrieval.
+    <strong>Flow State Control:</strong> You can pause anytime by pressing <span class="kbd">P</span> or <span class="kbd">Esc</span>. Incorrect answers or timeouts will pause the timer and reveal an intuitive visual model (Tape diagram, 100-Grid, or Number line vector) to solidify your mental schemas.
   </div>
 </div>
 
@@ -381,8 +487,7 @@
     isInteger() { return this.d === 1; }
     toFractionString() { return this.d === 1 ? `${this.n}` : `${this.n}/${this.d}`; }
     toDecimalString(maxDec = 3) {
-      const v = this.valueOf();
-      return `${Number(v.toFixed(maxDec))}`;
+      return `${Number(this.valueOf().toFixed(maxDec))}`;
     }
     toPercentString(maxDec = 1) {
       return `${Number((this.valueOf() * 100).toFixed(maxDec))}%`;
@@ -422,7 +527,6 @@
     return `${prefix}${intToWords(absN)} over ${intToWords(absD)}`;
   }
 
-  // Benchmark Fraction-Decimal Library for Instant Mental Mappings
   const BENCHMARKS = [
     { r: new Rational(1, 2), dec: 0.5, pct: "50%" },
     { r: new Rational(1, 4), dec: 0.25, pct: "25%" },
@@ -445,17 +549,24 @@
 
   // --- App State ---
   const state = {
+    hasStarted: false,
+    isPaused: false,
     level: 1.0,
     streak: 0,
     totalAnswered: 0,
     totalCorrect: 0,
     latencies: [],
-    startTime: null,
+    trialStartTime: null,
+    accumulatedActiveMs: 0,
+    pauseStartTime: null,
     currentProblem: null,
     inVisualModal: false,
-    timerId: null,
+    
+    // Timer tracking
+    timerRaf: null,
     timerDurationMs: 8000,
-    timerRemainingMs: 8000
+    timerRemainingMs: 8000,
+    timerEndStamp: null
   };
 
   const elements = {
@@ -470,18 +581,25 @@
     problemDisplay: document.getElementById("problem-display"),
     answerForm: document.getElementById("answer-form"),
     answerInput: document.getElementById("answer-input"),
+    submitBtn: document.getElementById("submit-btn"),
     feedback: document.getElementById("feedback"),
     timerBar: document.getElementById("timer-bar"),
     visContainer: document.getElementById("vis-container"),
     visTitle: document.getElementById("vis-title"),
     visGraphic: document.getElementById("vis-graphic"),
     visCaption: document.getElementById("vis-caption"),
-    continueBtn: document.getElementById("continue-btn")
+    continueBtn: document.getElementById("continue-btn"),
+    pauseBtn: document.getElementById("pause-btn"),
+    pauseText: document.getElementById("pause-text"),
+    pauseIcon: document.getElementById("pause-icon"),
+    startOverlay: document.getElementById("start-overlay"),
+    startBtn: document.getElementById("start-btn"),
+    pauseOverlay: document.getElementById("pause-overlay"),
+    resumeBtn: document.getElementById("resume-btn")
   };
 
-  // --- Visual Model Generators (SVG) ---
+  // --- SVG Visualizers ---
   const Visualizers = {
-    // 1. Number Line with Vector Jump
     renderNumberLine(target, start = 0, delta = null) {
       const val = target.valueOf();
       const st = delta !== null ? start : 0;
@@ -493,8 +611,8 @@
       const height = 90;
       const range = max - min;
       const scale = (x) => 30 + ((x - min) / range) * (width - 60);
-
       const yAxis = 50;
+
       let ticksSvg = "";
       for (let i = min; i <= max; i++) {
         const x = scale(i);
@@ -502,7 +620,6 @@
                      <text x="${x}" y="${yAxis + 20}" fill="#8b949e" font-size="11" text-anchor="middle" font-family="monospace">${i}</text>`;
       }
 
-      // Jump arc if arithmetic
       let jumpSvg = "";
       if (delta !== null && delta !== 0) {
         const x1 = scale(st);
@@ -516,7 +633,6 @@
         `;
       }
 
-      // Target point
       const tx = scale(val);
       const targetDot = `
         <circle cx="${tx}" cy="${yAxis}" r="6" fill="#58a6ff" />
@@ -533,7 +649,6 @@
       `;
     },
 
-    // 2. 10x10 Hundredths Area Grid
     renderHundredGrid(target) {
       const val = Math.max(0, Math.min(1, target.valueOf()));
       const filledCount = Math.round(val * 100);
@@ -547,19 +662,12 @@
         const row = Math.floor(i / 10);
         const x = col * (cellSize + gap);
         const y = row * (cellSize + gap);
-        const isFilled = i < filledCount;
-        const color = isFilled ? "#58a6ff" : "rgba(255, 255, 255, 0.08)";
-        rects += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" fill="${color}" />`;
+        rects += `<rect x="${x}" y="${y}" width="${cellSize}" height="${cellSize}" rx="2" fill="${i < filledCount ? '#58a6ff' : 'rgba(255, 255, 255, 0.08)'}" />`;
       }
 
-      return `
-        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-          ${rects}
-        </svg>
-      `;
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${rects}</svg>`;
     },
 
-    // 3. Segmented Tape Diagram
     renderTapeDiagram(target) {
       const d = Math.min(20, Math.max(1, target.d));
       const n = Math.abs(target.n);
@@ -577,8 +685,7 @@
 
         for (let s = 0; s < d; s++) {
           const sx = 10 + s * slotWidth;
-          const isFilled = remaining > 0;
-          if (isFilled) {
+          if (remaining > 0) {
             svgContent += `<rect x="${sx + 1}" y="${y + 1}" width="${slotWidth - 2}" height="${barHeight - 2}" fill="#3fb950" rx="2" opacity="0.85" />`;
             remaining--;
           }
@@ -589,11 +696,7 @@
       }
 
       const totalH = numBars * (barHeight + 10);
-      return `
-        <svg width="100%" height="${totalH}" viewBox="0 0 ${barWidth + 20} ${totalH}">
-          ${svgContent}
-        </svg>
-      `;
+      return `<svg width="100%" height="${totalH}" viewBox="0 0 ${barWidth + 20} ${totalH}">${svgContent}</svg>`;
     }
   };
 
@@ -604,8 +707,6 @@
 
   function generateTrial() {
     const lvl = state.level;
-
-    // Feature 3: Fraction-Decimal mapping trials (~25% probability or whenever level requests schema drills)
     const isMappingTrial = Math.random() < 0.28;
     const isVerbal = Math.random() < 0.25;
 
@@ -642,7 +743,7 @@
       }
     }
 
-    // Standard Operations (+, -, *, /)
+    // Arithmetic
     const allowNegatives = lvl >= 1.7;
     let ops = ["+", "-"];
     if (lvl >= 2.2) ops.push("*");
@@ -682,11 +783,10 @@
       case "/": answer = op1.div(op2); break;
     }
 
-    // Representation formatting
     const renderOp = (r, forceWord = false) => {
       if (forceWord) return rationalToWords(r);
       if (r.isInteger()) return r.n < 0 ? `(${r.n})` : `${r.n}`;
-      return r.n < 0 ? `(${r.r ? r.toFractionString() : r.toFractionString()})` : r.toFractionString();
+      return r.n < 0 ? `(${r.toFractionString()})` : r.toFractionString();
     };
 
     const opSymbols = { "+": "+", "-": "−", "*": "×", "/": "÷" };
@@ -707,7 +807,6 @@
       displayString = `${renderOp(op1)} ${opSymbols[op]} ${renderOp(op2)}`;
     }
 
-    // Visualization heuristic
     let visChoice = "numberline";
     if (!answer.isInteger() && answer.valueOf() > 0 && answer.valueOf() <= 1 && Math.random() < 0.5) {
       visChoice = "hundred";
@@ -757,20 +856,21 @@
     return Math.abs(userVal - targetRational.valueOf()) < 0.02;
   }
 
-  // --- Timer Engine ---
-  let timerRaf = null;
-  let timerEndStamp = null;
-
-  function startTimer(durationSeconds) {
+  // --- Precision Timer Engine ---
+  function startTimer(durationMs) {
     cancelTimer();
-    state.timerDurationMs = durationSeconds * 1000;
-    timerEndStamp = performance.now() + state.timerDurationMs;
+    state.timerDurationMs = durationMs;
+    state.timerRemainingMs = durationMs;
+    state.timerEndStamp = performance.now() + durationMs;
 
     elements.timerBar.classList.remove("urgent");
     elements.timerBar.style.width = "100%";
 
     function tick(now) {
-      const rem = Math.max(0, timerEndStamp - now);
+      if (state.isPaused) return;
+
+      const rem = Math.max(0, state.timerEndStamp - now);
+      state.timerRemainingMs = rem;
       const frac = rem / state.timerDurationMs;
       elements.timerBar.style.width = `${(frac * 100).toFixed(2)}%`;
 
@@ -781,28 +881,76 @@
       if (rem <= 0) {
         handleTimeout();
       } else {
-        timerRaf = requestAnimationFrame(tick);
+        state.timerRaf = requestAnimationFrame(tick);
       }
     }
-    timerRaf = requestAnimationFrame(tick);
+    state.timerRaf = requestAnimationFrame(tick);
   }
 
   function cancelTimer() {
-    if (timerRaf) {
-      cancelAnimationFrame(timerRaf);
-      timerRaf = null;
+    if (state.timerRaf) {
+      cancelAnimationFrame(state.timerRaf);
+      state.timerRaf = null;
     }
   }
 
-  // --- Mental Model Visualization Dispatcher ---
-  function showVisualization(problem, reasonTitle = "Mental Model Schema") {
+  // --- Session State Controls (Start, Pause, Resume) ---
+  function startSession() {
+    state.hasStarted = true;
+    elements.startOverlay.style.display = "none";
+    elements.pauseBtn.style.display = "flex";
+    elements.answerInput.disabled = false;
+    elements.submitBtn.disabled = false;
+    nextTrial();
+  }
+
+  function pauseSession() {
+    if (!state.hasStarted || state.isPaused || state.inVisualModal) return;
+
+    state.isPaused = true;
+    cancelTimer();
+
+    // Accumulate solving time prior to pause
+    state.accumulatedActiveMs += performance.now() - state.trialStartTime;
+    state.pauseStartTime = performance.now();
+
+    elements.pauseOverlay.style.display = "flex";
+    elements.pauseText.textContent = "Resume";
+    elements.pauseIcon.textContent = "▶";
+    elements.answerInput.disabled = true;
+  }
+
+  function resumeSession() {
+    if (!state.isPaused) return;
+
+    state.isPaused = false;
+    elements.pauseOverlay.style.display = "none";
+    elements.pauseText.textContent = "Pause";
+    elements.pauseIcon.textContent = "⏸";
+    elements.answerInput.disabled = false;
+    elements.answerInput.focus();
+
+    // Resume latency clock
+    state.trialStartTime = performance.now();
+
+    // Resume countdown with exact remaining slice
+    startTimer(state.timerRemainingMs);
+  }
+
+  function togglePause() {
+    if (!state.hasStarted) return;
+    if (state.isPaused) resumeSession();
+    else pauseSession();
+  }
+
+  // --- Visual Model Display ---
+  function showVisualization(problem, reasonTitle) {
     state.inVisualModal = true;
     cancelTimer();
 
     const target = problem.answer;
     let visHtml = "";
 
-    // Pick visualizer
     const visType = problem.recommendedVis;
     if (visType === "hundred" && target.valueOf() >= 0 && target.valueOf() <= 1) {
       elements.visTitle.textContent = "Mental Model • Base-10 Hundredths Area";
@@ -839,7 +987,6 @@
     if (isCorrect && !isTimeout) {
       state.totalCorrect++;
       state.streak++;
-      // Automaticity pacing: rewards fast retrieval (<2.5s)
       let delta = 0.15;
       if (latencyMs < 2000) delta = 0.35;
       else if (latencyMs < 3000) delta = 0.22;
@@ -847,7 +994,6 @@
       state.level = Math.min(10.0, state.level + delta);
     } else {
       state.streak = 0;
-      // Step back on errors/timeouts
       state.level = Math.max(1.0, state.level - 0.35);
     }
 
@@ -866,14 +1012,14 @@
 
   function handleAnswer(userVal) {
     cancelTimer();
-    const latency = performance.now() - state.startTime;
+    const totalLatency = state.accumulatedActiveMs + (performance.now() - state.trialStartTime);
     const isCorrect = answersMatch(userVal, state.currentProblem.answer);
 
-    recordTrial(isCorrect, latency, false);
+    recordTrial(isCorrect, totalLatency, false);
 
     if (isCorrect) {
       elements.feedback.className = "feedback success";
-      elements.feedback.textContent = `✓ Fluent! (${(latency / 1000).toFixed(2)}s)`;
+      elements.feedback.textContent = `✓ Fluent! (${(totalLatency / 1000).toFixed(2)}s)`;
       setTimeout(nextTrial, 650);
     } else {
       elements.feedback.className = "feedback error";
@@ -882,7 +1028,7 @@
     }
   }
 
-  // --- UI Render ---
+  // --- UI Updates ---
   function getTierLabel(lvl) {
     if (lvl < 2.5) return "Tier 1 • Core Fluency";
     if (lvl < 5.0) return "Tier 2 • Signed & Conversions";
@@ -911,7 +1057,8 @@
 
     const trial = generateTrial();
     state.currentProblem = trial;
-    state.startTime = performance.now();
+    state.accumulatedActiveMs = 0;
+    state.trialStartTime = performance.now();
 
     elements.promptLabel.textContent = trial.prompt;
     elements.problemDisplay.textContent = trial.displayString;
@@ -921,13 +1068,17 @@
     elements.answerInput.value = "";
     elements.answerInput.focus();
 
-    // Start adaptive countdown
-    startTimer(trial.estimatedSec);
+    startTimer(trial.estimatedSec * 1000);
   }
 
-  // --- Event Listeners ---
+  // --- Event Handling ---
+  elements.startBtn.addEventListener("click", startSession);
+  elements.resumeBtn.addEventListener("click", resumeSession);
+  elements.pauseBtn.addEventListener("click", togglePause);
+
   elements.answerForm.addEventListener("submit", (e) => {
     e.preventDefault();
+    if (!state.hasStarted || state.isPaused) return;
     if (state.inVisualModal) {
       hideVisualization();
       return;
@@ -941,15 +1092,28 @@
   });
 
   window.addEventListener("keydown", (e) => {
+    // Start session with Space or Enter on landing screen
+    if (!state.hasStarted && (e.code === "Space" || e.code === "Enter")) {
+      e.preventDefault();
+      startSession();
+      return;
+    }
+
+    // Toggle pause with P or Escape (unless reviewing a visualization)
+    if (state.hasStarted && !state.inVisualModal && (e.code === "KeyP" || e.code === "Escape")) {
+      e.preventDefault();
+      togglePause();
+      return;
+    }
+
+    // Advance past mental model visualization
     if (state.inVisualModal && (e.code === "Space" || e.code === "Enter")) {
       e.preventDefault();
       hideVisualization();
     }
   });
 
-  // Start Session
   renderStats();
-  nextTrial();
 })();
 </script>
 </body>
