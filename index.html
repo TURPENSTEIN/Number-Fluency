@@ -37,7 +37,7 @@
 
   .container {
     width: 100%;
-    max-width: 720px;
+    max-width: 740px;
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -128,7 +128,7 @@
     text-align: center;
     position: relative;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-    min-height: 330px;
+    min-height: 340px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -355,7 +355,7 @@
     justify-content: center;
     align-items: center;
     margin-bottom: 0.9rem;
-    min-height: 140px;
+    min-height: 160px;
   }
 
   /* Step-by-Step Blueprint Card */
@@ -460,11 +460,6 @@
   @keyframes barSlideIn {
     from { transform: scaleX(0); }
     to { transform: scaleX(1); }
-  }
-
-  @keyframes fluidFill {
-    from { width: 0; }
-    to { width: var(--target-w); }
   }
 </style>
 </head>
@@ -680,12 +675,11 @@
   ];
 
   // =========================================================================
-  // --- ULTRA-INTUITIVE VISUAL MENTAL MODELS (VERSION 2.0) ---
+  // --- ULTRA-INTUITIVE VISUAL MENTAL MODELS (CLEAN & NON-OVERLAPPING) ---
   // =========================================================================
   const Visualizers = {
     /**
      * MODEL 1: Area Decomposer 2.0 (Multiplication & Missing-Dimension Division)
-     * Features: Faint unit grid textures, explicit step-by-step place-value addition pathway.
      */
     renderAreaDecomposition(op1, op2, op, answer) {
       let v1 = Math.abs(op1.valueOf());
@@ -693,16 +687,15 @@
       let a, b, isDivision = (op === '/');
 
       if (isDivision) {
-        b = v2; // Divisor is height
-        a = Math.abs(answer.valueOf()); // Quotient is width
+        b = v2;
+        a = Math.abs(answer.valueOf());
       } else {
-        a = Math.max(v1, v2); // Decomposed dimension
-        b = Math.min(v1, v2); // Height
+        a = Math.max(v1, v2);
+        b = Math.min(v1, v2);
       }
 
       const isNeg = (op1.valueOf() * (isDivision ? 1 : op2.valueOf())) < 0;
 
-      // Decompose 'a' into Tens and Units
       let tens = Math.floor(a / 10) * 10;
       let units = a - tens;
       if (tens === 0) {
@@ -713,7 +706,7 @@
       const totalW = 380;
       const h = 84;
       const startX = 65;
-      const startY = 30;
+      const startY = 32;
       const ratio = units === 0 ? 1 : tens / a;
       const wTens = Math.max(100, Math.min(280, totalW * ratio));
       const wUnits = totalW - wTens;
@@ -721,7 +714,6 @@
       const areaTens = tens * b;
       const areaUnits = units * b;
 
-      // Faint grid pattern definition
       const gridPattern = `
         <pattern id="grid" width="12" height="12" patternUnits="userSpaceOnUse">
           <path d="M 12 0 L 0 0 0 12" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
@@ -729,7 +721,7 @@
       `;
 
       const svg = `
-        <svg width="100%" height="165" viewBox="0 0 480 165" style="overflow: visible; font-family: monospace;">
+        <svg width="100%" height="175" viewBox="0 0 480 175" style="overflow: visible; font-family: monospace;">
           <defs>
             ${gridPattern}
             <linearGradient id="gradTens" x1="0" y1="0" x2="1" y2="1">
@@ -742,7 +734,7 @@
             </linearGradient>
           </defs>
 
-          <!-- Height Label (Multiplier or Divisor) -->
+          <!-- Height Label -->
           <g>
             <rect x="8" y="${startY + h/2 - 14}" width="48" height="28" rx="6" fill="#161b22" stroke="#484f58" stroke-width="1.5"/>
             <text x="32" y="${startY + h/2 + 5}" fill="#8b949e" font-size="13" font-weight="700" text-anchor="middle">
@@ -754,10 +746,8 @@
           <g style="transform-origin: ${startX}px ${startY}px; animation: barSlideIn 380ms ease-out;">
             <rect x="${startX}" y="${startY}" width="${wTens}" height="${h}" rx="6" fill="url(#gradTens)" stroke="#388bfd" stroke-width="2"/>
             <rect x="${startX}" y="${startY}" width="${wTens}" height="${h}" rx="6" fill="url(#grid)"/>
-            <!-- Dimension Tag on Top -->
-            <rect x="${startX + wTens/2 - 26}" y="${startY - 22}" width="52" height="18" rx="4" fill="#0d1117" stroke="#388bfd" stroke-width="1"/>
+            <rect x="${startX + wTens/2 - 28}" y="${startY - 22}" width="56" height="18" rx="4" fill="#0d1117" stroke="#388bfd" stroke-width="1"/>
             <text x="${startX + wTens/2}" y="${startY - 9}" fill="#58a6ff" font-size="11" font-weight="700" text-anchor="middle">width ${tens}</text>
-            <!-- Sub-Product in Center -->
             <text x="${startX + wTens/2}" y="${startY + h/2 - 2}" fill="#f0f6fc" font-size="15" font-weight="700" text-anchor="middle">${tens} × ${b}</text>
             <text x="${startX + wTens/2}" y="${startY + h/2 + 18}" fill="#58a6ff" font-size="17" font-weight="800" text-anchor="middle">= ${areaTens}</text>
           </g>
@@ -767,13 +757,10 @@
           <g style="transform-origin: ${startX + wTens}px ${startY}px; animation: barSlideIn 450ms 150ms ease-out both;">
             <rect x="${startX + wTens}" y="${startY}" width="${wUnits}" height="${h}" rx="6" fill="url(#gradUnits)" stroke="#2ea043" stroke-width="2"/>
             <rect x="${startX + wTens}" y="${startY}" width="${wUnits}" height="${h}" rx="6" fill="url(#grid)"/>
-            <!-- Dimension Tag on Top -->
-            <rect x="${startX + wTens + wUnits/2 - 26}" y="${startY - 22}" width="52" height="18" rx="4" fill="#0d1117" stroke="#2ea043" stroke-width="1"/>
+            <rect x="${startX + wTens + wUnits/2 - 28}" y="${startY - 22}" width="56" height="18" rx="4" fill="#0d1117" stroke="#2ea043" stroke-width="1"/>
             <text x="${startX + wTens + wUnits/2}" y="${startY - 9}" fill="#3fb950" font-size="11" font-weight="700" text-anchor="middle">width ${units}</text>
-            <!-- Sub-Product in Center -->
             <text x="${startX + wTens + wUnits/2}" y="${startY + h/2 - 2}" fill="#f0f6fc" font-size="15" font-weight="700" text-anchor="middle">${units} × ${b}</text>
             <text x="${startX + wTens + wUnits/2}" y="${startY + h/2 + 18}" fill="#3fb950" font-size="17" font-weight="800" text-anchor="middle">= ${areaUnits}</text>
-            <!-- Animated Seam -->
             <line x1="${startX + wTens}" y1="${startY}" x2="${startX + wTens}" y2="${startY + h}" stroke="#ffffff" stroke-width="2" stroke-dasharray="4,4"/>
           </g>
           ` : ''}
@@ -781,8 +768,8 @@
           <!-- Combine Pathway Bracket -->
           <path d="M ${startX} ${startY + h + 8} L ${startX} ${startY + h + 16} L ${startX + totalW} ${startY + h + 16} L ${startX + totalW} ${startY + h + 8}" fill="none" stroke="#8b949e" stroke-width="1.5"/>
           <g style="animation: pulseGlow 2s infinite;">
-            <rect x="${startX + totalW/2 - 90}" y="${startY + h + 22}" width="180" height="24" rx="6" fill="#161b22" stroke="${isNeg ? '#f85149' : '#58a6ff'}" stroke-width="1.5"/>
-            <text x="${startX + totalW/2}" y="${startY + h + 38}" fill="${isNeg ? '#f85149' : '#f0f6fc'}" font-size="13" font-weight="700" text-anchor="middle">
+            <rect x="${startX + totalW/2 - 90}" y="${startY + h + 24}" width="180" height="24" rx="6" fill="#161b22" stroke="${isNeg ? '#f85149' : '#58a6ff'}" stroke-width="1.5"/>
+            <text x="${startX + totalW/2}" y="${startY + h + 40}" fill="${isNeg ? '#f85149' : '#f0f6fc'}" font-size="13" font-weight="700" text-anchor="middle">
               ${units > 0 ? `${areaTens} + ${areaUnits} = ` : ''}${isNeg ? '-' : ''}${Math.abs(answer.valueOf())}
             </text>
           </g>
@@ -803,9 +790,9 @@
     },
 
     /**
-     * MODEL 2: Tri-Ribbon Continuum Gauge 2.0 (Fractions, Decimals, & Percentages)
-     * Features: Literal partitioned unit boxes on top, continuous liquid fill gauge on bottom,
-     * linked by a glowing laser needle that proves they represent the exact same continuous volume.
+     * MODEL 2: Tri-Ribbon Continuum Gauge 2.0 (Zero Overlap & Enhanced Contrast)
+     * FIX: Titles are placed in dedicated top lanes, while slice texts are placed INSIDE
+     * the colored partition boxes so no overlapping text collision can ever occur.
      */
     renderDualGauge(targetRational) {
       const val = Math.abs(targetRational.valueOf());
@@ -823,15 +810,22 @@
       let filledSlices = (d <= 12 && domainMax === 1.0) ? n : Math.round((val / domainMax) * sliceCount);
       let sliceW = usable / sliceCount;
 
+      // Font size auto-adapts to slice width so numbers never clip
+      const fontSize = sliceCount > 8 ? 8.5 : 10;
+
       let fractionSlicesSvg = '';
       for (let i = 0; i < sliceCount; i++) {
         const sx = pad + i * sliceW;
         const isFilled = i < filledSlices;
         fractionSlicesSvg += `
-          <rect x="${sx + 1}" y="22" width="${sliceW - 2}" height="18" rx="3"
-                fill="${isFilled ? '#1f6feb' : 'rgba(255,255,255,0.06)'}" 
+          <rect x="${sx + 1}" y="26" width="${sliceW - 2}" height="24" rx="4"
+                fill="${isFilled ? '#1f6feb' : 'rgba(255,255,255,0.05)'}" 
                 stroke="${isFilled ? '#388bfd' : '#30363d'}" stroke-width="1.5"/>
-          <text x="${sx + sliceW/2}" y="14" fill="#8b949e" font-size="9" text-anchor="middle">${i+1}/${sliceCount}</text>
+          <!-- Label placed INSIDE the box, vertically centered at y=42 (NO HEADER OVERLAP) -->
+          <text x="${sx + sliceW/2}" y="42" fill="${isFilled ? '#ffffff' : '#6e7681'}" 
+                font-size="${fontSize}" font-weight="700" text-anchor="middle">
+            ${i+1}/${sliceCount}
+          </text>
         `;
       }
 
@@ -845,51 +839,58 @@
       ];
 
       const svg = `
-        <svg width="100%" height="165" viewBox="0 0 ${width} 165" style="overflow: visible; font-family: monospace;">
+        <svg width="100%" height="185" viewBox="0 0 ${width} 185" style="overflow: visible; font-family: monospace;">
           <defs>
             <linearGradient id="liquidGrad" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stop-color="#1f6feb"/>
-              <stop offset="70%" stop-color="#3fb950"/>
+              <stop offset="65%" stop-color="#3fb950"/>
               <stop offset="100%" stop-color="#58a6ff"/>
             </linearGradient>
           </defs>
 
-          <!-- Track 1 Header: Discrete Partitions -->
-          <text x="${pad}" y="14" fill="#58a6ff" font-size="10" font-weight="700">FRACTION PARTITIONS (${n} of ${d})</text>
+          <!-- 1. Dedicated Header Row (NO LABELS OVERLAPPING HERE) -->
+          <text x="${pad}" y="16" fill="#58a6ff" font-size="11" font-weight="700" letter-spacing="0.04em">
+            1. FRACTION PARTITIONS (${n} of ${d} parts shaded)
+          </text>
+
+          <!-- Partition Boxes (y=26 to y=50) -->
           ${fractionSlicesSvg}
 
-          <!-- Track 2 Header: Continuous Decimal Metric -->
-          <text x="${pad}" y="66" fill="#3fb950" font-size="10" font-weight="700">CONTINUOUS LIQUID SCALE (Decimals & %)</text>
+          <!-- 2. Continuous Metric Header Row -->
+          <text x="${pad}" y="74" fill="#3fb950" font-size="11" font-weight="700" letter-spacing="0.04em">
+            2. CONTINUOUS SCALE (Decimal distance & Percentage volume)
+          </text>
           
-          <!-- Background Track -->
-          <rect x="${pad}" y="74" width="${usable}" height="18" rx="9" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
+          <!-- Background Ruler Track (y=82 to y=102) -->
+          <rect x="${pad}" y="82" width="${usable}" height="20" rx="10" fill="#161b22" stroke="#30363d" stroke-width="1.5"/>
           
           <!-- Filled Liquid Gauge -->
-          <rect x="${pad}" y="75" width="${targetX - pad}" height="16" rx="8" fill="url(#liquidGrad)" opacity="0.85"
+          <rect x="${pad}" y="83" width="${Math.max(12, targetX - pad)}" height="18" rx="9" fill="url(#liquidGrad)" opacity="0.85"
                 style="animation: barSlideIn 500ms ease-out;"/>
 
           <!-- Ruler Tick Marks -->
           ${benchmarks.map(b => {
             const bx = pad + (b.v / domainMax) * usable;
             return `
-              <line x1="${bx}" y1="74" x2="${bx}" y2="92" stroke="#30363d" stroke-width="1.5"/>
-              <text x="${bx}" y="106" fill="#8b949e" font-size="10" font-weight="600" text-anchor="middle">${b.d}</text>
-              <text x="${bx}" y="117" fill="#484f58" font-size="9" text-anchor="middle">${b.p}</text>
+              <line x1="${bx}" y1="82" x2="${bx}" y2="102" stroke="#30363d" stroke-width="1.5"/>
+              <text x="${bx}" y="116" fill="#8b949e" font-size="10" font-weight="600" text-anchor="middle">${b.d}</text>
+              <text x="${bx}" y="127" fill="#484f58" font-size="9" text-anchor="middle">${b.p}</text>
             `;
           }).join('')}
 
-          <!-- Synchronized Laser Needle Piercing Both Scales -->
+          <!-- Synchronized Laser Needle Connecting Both Systems -->
           <g>
-            <line x1="${targetX}" y1="18" x2="${targetX}" y2="98" stroke="#ffffff" stroke-width="2.5"
+            <line x1="${targetX}" y1="22" x2="${targetX}" y2="106" stroke="#ffffff" stroke-width="2.5"
                   style="filter: drop-shadow(0 0 8px #58a6ff); animation: pulseGlow 1.5s infinite;"/>
-            <circle cx="${targetX}" cy="31" r="5" fill="#58a6ff"/>
-            <circle cx="${targetX}" cy="83" r="5" fill="#3fb950"/>
+            <!-- Colored Anchor Pins -->
+            <circle cx="${targetX}" cy="38" r="5" fill="#58a6ff"/>
+            <circle cx="${targetX}" cy="92" r="5" fill="#3fb950"/>
 
             <!-- Identity Pill Badge -->
             <g style="animation: pulseGlow 2s infinite;">
-              <rect x="${Math.max(10, Math.min(width - 180, targetX - 85))}" y="130" width="170" height="26" rx="6"
+              <rect x="${Math.max(10, Math.min(width - 200, targetX - 100))}" y="142" width="200" height="28" rx="6"
                     fill="#161b22" stroke="#58a6ff" stroke-width="1.5"/>
-              <text x="${Math.max(95, Math.min(width - 95, targetX))}" y="147" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">
+              <text x="${Math.max(110, Math.min(width - 100, targetX))}" y="160" fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle">
                 ${targetRational.toFractionString()} ≡ ${targetRational.toDecimalString(3)} ≡ ${targetRational.toPercentString(1)}
               </text>
             </g>
@@ -900,7 +901,7 @@
       const steps = [
         `Fraction division: ${n} divided into ${d} equal parts = <strong>${targetRational.toFractionString()}</strong> of whole`,
         `Base-10 equivalent: ${targetRational.toFractionString()} fills exactly <strong>${targetRational.toDecimalString(3)}</strong> of the continuous unit`,
-        `Percentage benchmark: Move decimal 2 places right = <strong>${targetRational.toPercentString(1)}</strong>`
+        `Percentage benchmark: Shift decimal 2 places right = <strong>${targetRational.toPercentString(1)}</strong>`
       ];
 
       return { svg, steps };
@@ -908,8 +909,6 @@
 
     /**
      * MODEL 3: Signed Force Collision & Neutralization 2.0
-     * Features: Clear directional tug-of-war compass, animated zero-pair cancellation box,
-     * highlighting the surviving uncancelled force.
      */
     renderSignedNeutralization(op1, op2, op, answer) {
       const v1 = op1.valueOf();
@@ -918,8 +917,8 @@
 
       const maxMag = Math.max(10, Math.abs(v1), Math.abs(v2), Math.abs(ans)) * 1.25;
       const width = 480;
-      const height = 165;
-      const zeroX = width / 2; // 240px
+      const height = 175;
+      const zeroX = width / 2;
       const scale = (val) => (val / maxMag) * (zeroX - 40);
 
       const w1 = scale(v1);
@@ -953,7 +952,7 @@
             </text>
           </g>
 
-          <!-- Vector 2 (Applied Force Chained to Vector 1 Tip) -->
+          <!-- Vector 2 (Applied Force Chained to Tip) -->
           <g style="transform-origin: ${attachX}px 62px; animation: barSlideIn 450ms 180ms ease-out both;">
             <rect x="${v2 >= 0 ? attachX : attachX + w2}" y="60" width="${Math.abs(w2)}" height="22" rx="4"
                   fill="${v2 >= 0 ? 'rgba(63, 185, 80, 0.4)' : 'rgba(248, 81, 73, 0.4)'}"
@@ -968,9 +967,9 @@
             <g style="animation: dissolveNegation 1.5s infinite;">
               <rect x="${neutralLeftX}" y="32" width="${wNeutral}" height="52" rx="6"
                     fill="none" stroke="#d29922" stroke-width="2" stroke-dasharray="5,3"/>
-              <rect x="${neutralLeftX + wNeutral/2 - 75}" y="92" width="150" height="18" rx="4" fill="#161b22" stroke="#d29922" stroke-width="1"/>
-              <text x="${neutralLeftX + wNeutral/2}" y="105" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">
-                ⚡ ${neutralMag} Opposing Units Cancel (${neutralMag} - ${neutralMag} = 0)
+              <rect x="${neutralLeftX + wNeutral/2 - 80}" y="94" width="160" height="20" rx="4" fill="#161b22" stroke="#d29922" stroke-width="1"/>
+              <text x="${neutralLeftX + wNeutral/2}" y="108" fill="#d29922" font-size="10" font-weight="700" text-anchor="middle">
+                ⚡ ${neutralMag} Units Neutralized (${neutralMag} - ${neutralMag} = 0)
               </text>
             </g>
           ` : ''}
@@ -994,12 +993,12 @@
 
       const steps = signsOppose ? [
         `Identify opposing forces: <strong>${Math.abs(v1)}</strong> pulling ${v1 >= 0 ? 'Right (+)' : 'Left (−)'} vs <strong>${Math.abs(v2)}</strong> pulling ${v2 >= 0 ? 'Right (+)' : 'Left (−)'}`,
-        `Zero-pair cancellation: Both sides destroy equal amounts = <strong>${neutralMag} units neutralized</strong>`,
-        `Isolate surviving force: Greater force wins direction ➔ Net balance is <strong>${answer.toFractionString()}</strong>`
+        `Zero-pair cancellation: Opposing forces destroy equal amounts = <strong>${neutralMag} units neutralized</strong>`,
+        `Isolate surviving force: Dominant side prevails ➔ Net balance is <strong>${answer.toFractionString()}</strong>`
       ] : [
         `Identify matching directions: Both forces pull in the same direction (${v1 >= 0 ? 'Positive/Right' : 'Negative/Left'})`,
         `Cumulative chaining: Combine magnitudes: ${Math.abs(v1)} + ${Math.abs(v2)} = <strong>${Math.abs(ans)}</strong>`,
-        `Maintain polarity: Preserves sign ➔ Net balance is <strong>${answer.toFractionString()}</strong>`
+        `Maintain polarity: Preserves direction ➔ Net balance is <strong>${answer.toFractionString()}</strong>`
       ];
 
       return { svg, steps };
@@ -1176,7 +1175,6 @@
       displayString = `${renderOp(op1)} ${opSymbols[op]} ${renderOp(op2)}`;
     }
 
-    // Determine intuitive model routing
     let modelType = "neutralization";
     if (op === "*" || op === "/") {
       modelType = "area";
@@ -1357,7 +1355,6 @@
     elements.summaryOverlay.style.display = "flex";
   }
 
-  // --- Show Visualization with Dynamic Blueprint ---
   function showVisualization(problem, reasonTitle) {
     state.inVisualModal = true;
     state.modalOpenedAt = performance.now();
@@ -1379,7 +1376,6 @@
 
     elements.visGraphic.innerHTML = result.svg;
     
-    // Render Blueprint Steps
     elements.blueprintSteps.innerHTML = result.steps.map((s, idx) => `
       <div><span class="blueprint-step-num">${idx + 1}.</span> ${s}</div>
     `).join('');
@@ -1531,7 +1527,6 @@
     submitCurrentAnswer();
   });
 
-  // Unified Keydown for Input: Handles Space & Enter identically with propagation guard
   elements.answerInput.addEventListener("keydown", (e) => {
     if (e.code === "Space" || e.code === "Enter") {
       e.preventDefault();
@@ -1544,7 +1539,6 @@
     if (state.inVisualModal) hideVisualization();
   });
 
-  // Global Window Shortcuts (Guarded by 250ms debounce)
   window.addEventListener("keydown", (e) => {
     if (!state.hasStarted && !state.isFinished && (e.code === "Space" || e.code === "Enter")) {
       e.preventDefault();
